@@ -5,6 +5,9 @@ import numpy as np
 import numpy.random as npr
 import grain, crude
 import glob
+import matplotlib.pyplot as plt
+import math
+
 
 # ADD ANY OTHER IMPORTS YOU LIKE
 
@@ -43,33 +46,107 @@ def part1_load(folder1, folder2, n):
     container2 = dictionary_to_file(folder2)
 
     sum_of_directories = container1 + container2
-    dataframe = pd.DataFrame(sum_of_directories)
-    # print(dataframe)
-    dataframe = dataframe.fillna(0)
-    dataframe_final = dataframe.sum()
-    n_above = []
-    for word in list(dataframe_final.index[2:]):
-        if dataframe_final[word] > n:
-            n_above.append(word)
-    # print(n_above)
+    word_freq_df = pd.DataFrame(sum_of_directories)
+    word_freq_df = word_freq_df.fillna(0)
 
-    n_final = dataframe.drop(n_above, 1)
-    # return n_final
+    too_little = []
+    for column in word_freq_df.columns[2:]:
+        if word_freq_df[column].sum() <= n:
+            too_little.append(column)
 
-    return n_final # DUMMY RETURN
+    
+    filtered_df = word_freq_df.drop(columns=too_little)
 
-def part2_vis(df):
+
+    
+    return filtered_df
+
+ 
+# print(part1_load("grain", "crude", 25))
+
+
+
+
+def part2_vis(df, m):
     # DO NOT CHANGE
     assert isinstance(df, pd.DataFrame)
 
-    # CHANGE WHAT YOU WANT HERE
-    return df.plot(kind="bar")
+    
+    df_sum_of_columns = df.sum()[2:]
+    df_sorted = df_sum_of_columns.sort_values(ascending = False)
+    df_higher_than_m = df_sorted[m:]
+    final = df.drop(df_higher_than_m.index, 1)
+    # print(final)
+    dy = final.groupby(['classname']).sum().sort_values(final['classname'][0], axis=1, ascending=False)
+    dx = final.groupby(['classname']).sum().sort_values(final['classname'][1], axis=1, ascending=False)
+    # dy = df.groupby('classname').get_group('crude').drop(['classname','filename'],axis=1)
+    # dx = df.groupby('classname').get_group('grain').drop(['classname', 'filename'],axis=1)
+    plt.plot(dx, dy)
+    plt.show()
+    return (dy.T.plot(kind="bar"), dx.T.plot(kind="bar"))
+
+
+part2_vis(part1_load('grain', 'crude', 100), 2)
 
 def part3_tfidf(df):
     # DO NOT CHANGE
     assert isinstance(df, pd.DataFrame)
+    td_df = df.copy()
 
-    # CHANGE WHAT YOU WANT HERE
-    return df #DUMMY RETURN
+    for column in td_df:
+        if column != "classname" and column != "filename": #avoid start columns otherwise error!
+            term_frequency = td_df[column] # one series with term and all frequencies of corpus
+            documents_without_term = term_frequency.isin([0]).sum() #Shown as bools --  with .sum() it becomes int.
+            total_term_frequency = term_frequency.sum() # Get the total amount of frequency/occurrence in corpus
+            # print(term_frequency)
+            # print(documents_without_term)
+            # print(total_term_frequency)
+            # print(td_df[column])
+            total_number_of_documents = len(td_df[column]) # kind of a troubled way to avoid 0-counts ... in combi with total_term_frequency
+            idf = math.log(len(td_df) / (len(td_df) - documents_without_term)) # IDF formula with log
+            td_df[column] = td_df[column] * idf #simple multiplication since I took Log in the previous
+
+
+    return td_df #DUMMY RETURN
+
+
+# print(part3_tfidf(part1_load('grain', 'crude', 20)))
 
 # ADD WHATEVER YOU NEED HERE, INCLUDING BONUS CODE.
+
+
+
+def part4_vis(df, m):
+    # DO NOT CHANGE
+    assert isinstance(df, pd.DataFrame)
+
+    
+    df_sum_of_columns = df.sum()[2:]
+    df_sorted = df_sum_of_columns.sort_values(ascending = False)
+    df_higher_than_m = df_sorted[m:]
+    final = df.drop(df_higher_than_m.index, 1)
+    # print(final)
+    dy = final.groupby(['classname']).sum().sort_values(final['classname'][0], axis=1, ascending=False)
+    dx = final.groupby(['classname']).sum().sort_values(final['classname'][1], axis=1, ascending=False)
+    # dy = df.groupby('classname').get_group('crude').drop(['classname','filename'],axis=1)
+    # dx = df.groupby('classname').get_group('grain').drop(['classname', 'filename'],axis=1)
+    plt.plot(dx, dy)
+    plt.show()
+    return (dy.T.plot(kind="bar"), dx.T.plot(kind="bar"))
+
+
+
+print(part4_vis(part3_tfidf(part1_load('grain', 'crude', 20)), 10))
+
+
+
+
+
+
+
+
+
+
+
+
+
