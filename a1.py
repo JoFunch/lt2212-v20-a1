@@ -36,7 +36,7 @@ def dictionary_to_file(directory):
         proccessed_directory.append(file_content)
     return proccessed_directory
 
-# print(dictionary_to_file('grain'))
+print(dictionary_to_file('grain'))
 
 def part1_load(folder1, folder2, n):
     # CHANGE WHATEVER YOU WANT *INSIDE* THIS FUNCTION.
