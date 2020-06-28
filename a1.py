@@ -8,6 +8,18 @@ import glob
 import matplotlib.pyplot as plt
 import math
 
+#for bonus
+from sklearn.model_selection import train_test_split
+from sklearn import preprocessing
+from sklearn.svm import LinearSVC
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
+from sklearn import svm
+
+
+from sklearn.neighbors import KNeighborsClassifier
+
+
 
 # ADD ANY OTHER IMPORTS YOU LIKE
 
@@ -36,9 +48,9 @@ def dictionary_to_file(directory):
         proccessed_directory.append(file_content)
     return proccessed_directory
 
-print(dictionary_to_file('grain'))
+#print(dictionary_to_file('grain'))
 
-def part1_load(folder1, folder2, n):
+def part1_load(folder1, folder2, n=50):
     # CHANGE WHATEVER YOU WANT *INSIDE* THIS FUNCTION.
     
 
@@ -86,7 +98,7 @@ def part2_vis(df, m):
     return (dy.T.plot(kind="bar"), dx.T.plot(kind="bar"))
 
 
-part2_vis(part1_load('grain', 'crude', 100), 2)
+# part2_vis(part1_load('grain', 'crude', 100), 2)
 
 def part3_tfidf(df):
     # DO NOT CHANGE
@@ -110,7 +122,8 @@ def part3_tfidf(df):
     return td_df #DUMMY RETURN
 
 
-# print(part3_tfidf(part1_load('grain', 'crude', 20)))
+
+#print(part3_tfidf(part1_load('grain', 'crude', 1)))
 
 # ADD WHATEVER YOU NEED HERE, INCLUDING BONUS CODE.
 
@@ -136,17 +149,33 @@ def part4_vis(df, m):
 
 
 
-print(part4_vis(part3_tfidf(part1_load('grain', 'crude', 20)), 10))
+# print(part4_vis(part3_tfidf(part1_load('grain', 'crude', 20)), 10))
 
 
 
 
 
+#print(classification(part1_load('grain', 'crude')))
+#print(classification(part3_tfidf(part1_load('grain', 'crude'))))
 
 
 
+def Bonus_KNClassifier(df):
+    
+
+    X = df.iloc[:,2:].to_numpy() # turn the DF without class/foldername into array
+    y = df["classname"].to_numpy() # take the class/foldername into variable
+
+    # print(X, y)
+
+    class_model = KNeighborsClassifier(n_neighbors=3) # make model
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.10, random_state=42) #make training and set variables here 90/10
+    class_model.fit(X_train, y_train)
+    pred = class_model.predict(X_test)
+    accuracy = accuracy_score(pred, y_test)
+    return accuracy
 
 
-
-
-
+#print(Bonus_KNClassifier(part1_load('grain', 'crude'))) #n auto set to 5
+#print(Bonus_KNClassifier(part3_tfidf(part1_load('grain', 'crude'))))
